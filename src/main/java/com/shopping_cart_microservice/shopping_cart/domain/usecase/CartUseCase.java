@@ -21,55 +21,49 @@ import java.util.List;
 import java.util.Map;
 
 public class CartUseCase implements ICartModelServicePort {
-    private final IAuthenticationSecurityPort authenticationPersistencePort;
+
     private final ICartModelPersistencePort cartPersistencePort;
     private final IStockConnectionPersistencePort stockConnectionPersistencePort;
     private final ISupplyConnectionPersistencePort supplyConnectionPersistencePort;
 
     private static final Logger logger = LoggerFactory.getLogger(StockConnectionAdapter.class);
 
-    public CartUseCase(IAuthenticationSecurityPort authenticationPersistencePort, ICartModelPersistencePort cartPersistencePort, IStockConnectionPersistencePort stockConnectionPersistencePort, ISupplyConnectionPersistencePort supplyConnectionPersistencePort) {
-        this.authenticationPersistencePort = authenticationPersistencePort;
+    public CartUseCase( ICartModelPersistencePort cartPersistencePort, IStockConnectionPersistencePort stockConnectionPersistencePort, ISupplyConnectionPersistencePort supplyConnectionPersistencePort) {
+
         this.cartPersistencePort = cartPersistencePort;
         this.stockConnectionPersistencePort = stockConnectionPersistencePort;
         this.supplyConnectionPersistencePort = supplyConnectionPersistencePort;
     }
 
     @Override
-    public void addArticleToCart(CartModel cartModel) {
-        Long userId = authenticationPersistencePort.getAuthenticatedUserId();
-        cartModel.setUserId(userId);
+    public CartModel addArticleToCart(CartModel cartModel) {
 
-        logger.info("ARTICULO ID: {}", cartModel.getArticleId());
         validateProductExistence(cartModel.getArticleId());
 
-        CartModel existingCart = cartPersistencePort.findArticleByUserIdAndArticleId(userId, cartModel.getArticleId());
+        CartModel existingCart = cartPersistencePort.findArticleByUserIdAndArticleId(cartModel.getUserId(), cartModel.getArticleId());
 
         int totalQuantity = cartModel.getQuantity();
-
         if (existingCart != null) {
             totalQuantity += existingCart.getQuantity();
+            validateStockAvailability(cartModel.getArticleId(), totalQuantity);
+            updateExistingCart(existingCart, cartModel.getQuantity());
+            return existingCart;
         }
 
         validateStockAvailability(cartModel.getArticleId(), totalQuantity);
 
-        if (existingCart != null) {
-            updateExistingCart(existingCart, cartModel.getQuantity());
-            cartModel.setCreationDate(existingCart.getCreationDate());
-            cartModel.setLastUpdatedDate(existingCart.getLastUpdatedDate());
-            return;
-        }
-
-        List<Long> productsCart = new ArrayList<>(cartPersistencePort.findArticleIdsByUserId(userId));
+        List<Long> productsCart = new ArrayList<>(cartPersistencePort.findArticleIdsByUserId(cartModel.getUserId()));
         productsCart.add(cartModel.getArticleId());
         checkCategoriesLimit(productsCart);
+
         createNewCart(cartModel);
+
+        return cartPersistencePort.addProductToCart(cartModel);
     }
 
     private void createNewCart(CartModel cartModel) {
         cartModel.setCreationDate(LocalDate.now());
         cartModel.setLastUpdatedDate(LocalDate.now());
-        cartPersistencePort.addProductToCart(cartModel);
     }
 
     private void validateProductExistence(Long articleId) {

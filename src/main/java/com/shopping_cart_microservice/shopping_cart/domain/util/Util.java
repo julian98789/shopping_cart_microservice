@@ -13,16 +13,16 @@ public class Util {
     public static final String TRANSACTION_SERVICE_NAME = "transaction";
     public static final String TRANSACTION_SERVICE_URL = "http://localhost:8082";
     public static final String ARTICLE_NOT_FOUND = "Articulo no encontrado";
-    public static final String NEXT_SUPPLY_DATE_NOT_FOUND = "Se requiere la próxima fecha de suministro" ;
     public static final String ARTICLE_QUANTITY_REQUIRED = "Se requiere cantidad del articulo";
-    public static final String SUPPLY_NOT_FOUND = "Suministro no encontrado";
-    public static final String NEXT_SUPPLY_DATE_INVALID = "La proxima fecha de suministro no puede ser anterior a hoy";
+    public static final String ARTICLE_REQUIRED = "El articulo es requerido";
     public static final String NEXT_SUPPLY_DATE_KEY = "nextSupplyDate";
     public static final String INSUFFICIENT_STOCK = "Stock insuficiente";
     public static final String CATEGORIES_LIMIT_EXCEEDED = "Se ha excedido el límite de categorías para la categoría: ";
 
     public static final int TOKEN_PREFIX_LENGTH = 7;
     public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final int  ARTICLE_QUANTITY_MIN = 1;
+    public static final String  ARTICLE_QUANTITY_MIN_MESSAGE = "La cantidad debe ser mayor a 0";
     private Util() {
     }
 }

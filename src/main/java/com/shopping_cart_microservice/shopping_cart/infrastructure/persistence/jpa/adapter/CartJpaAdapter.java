@@ -16,8 +16,9 @@ public class CartJpaAdapter implements ICartModelPersistencePort {
     private final ICartRepository cartRepository;
 
     @Override
-    public void addProductToCart(CartModel cartModel) {
-        cartRepository.save(cartEntityMapper.cartModelToCartEntity(cartModel));
+    public CartModel addProductToCart(CartModel cartModel) {
+        CartEntity cartEntity = cartRepository.save(cartEntityMapper.cartModelToCartEntity(cartModel));
+        return cartEntityMapper.cartEntityToCartModel(cartEntity);
     }
 
     @Override

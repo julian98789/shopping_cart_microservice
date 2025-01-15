@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ICartModelPersistencePort {
 
-    void addProductToCart(CartModel cartModel);
+    CartModel addProductToCart(CartModel cartModel);
 
     CartModel findArticleByUserIdAndArticleId(Long userId, Long articleId);
 

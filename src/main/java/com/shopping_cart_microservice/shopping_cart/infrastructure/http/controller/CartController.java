@@ -2,6 +2,7 @@ package com.shopping_cart_microservice.shopping_cart.infrastructure.http.control
 
 import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartRequest;
 import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.handler.card_handler.ICartHandler;
 import com.shopping_cart_microservice.shopping_cart.application.mapper.cart.ICartRequestMapper;
 import com.shopping_cart_microservice.shopping_cart.application.mapper.cart.ICartResponseMapper;
 import com.shopping_cart_microservice.shopping_cart.domain.api.ICartModelServicePort;
@@ -24,17 +25,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class CartController {
 
-    private final ICartRequestMapper cartRequestMapper;
-    private final ICartResponseMapper cartResponseMapper;
-    private final ICartModelServicePort cartServicePort;
+
+    private final ICartHandler cartHandler;
     private static final Logger logger = LoggerFactory.getLogger(CartController.class);
 
     @PreAuthorize(Util.ROLE_CLIENT )
     @PostMapping("/add-article-to-card")
     public ResponseEntity<CartResponse> addArticleToCart( @Valid @RequestBody CartRequest cartRequest) {
-        CartModel cart = cartRequestMapper.cartRequestToCartModel(cartRequest);
-        cartServicePort.addArticleToCart(cart);
-        CartResponse cartResponse = cartResponseMapper.cartModelToCartResponse(cart);
+
+        CartResponse cartResponse = cartHandler.addArticleToCart(cartRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
     }

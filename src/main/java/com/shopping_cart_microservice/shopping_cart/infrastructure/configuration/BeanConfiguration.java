@@ -42,11 +42,10 @@ public class BeanConfiguration {
     @Bean
     public ICartModelServicePort cartServicePort(
             ICartModelPersistencePort cartPersistencePort,
-            IAuthenticationSecurityPort authenticationSecurityPort,
             IStockConnectionPersistencePort stockConnectionPersistencePort,
             ISupplyConnectionPersistencePort supplyConnectionPersistencePort
     ) {
-        return new CartUseCase(authenticationSecurityPort, cartPersistencePort, stockConnectionPersistencePort,  supplyConnectionPersistencePort);
+        return new CartUseCase( cartPersistencePort, stockConnectionPersistencePort,  supplyConnectionPersistencePort);
     }
 
     @Bean
