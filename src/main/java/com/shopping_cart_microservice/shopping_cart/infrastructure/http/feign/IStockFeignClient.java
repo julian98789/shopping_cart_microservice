@@ -1,7 +1,8 @@
 package com.shopping_cart_microservice.shopping_cart.infrastructure.http.feign;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.ArticleCartList;
-import com.shopping_cart_microservice.shopping_cart.application.dto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.stock_dto.ArticleCartList;
+import com.shopping_cart_microservice.shopping_cart.application.dto.stock_dto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.domain.model.ArticleModel;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -31,8 +32,8 @@ public interface IStockFeignClient {
             @RequestParam(required = false) String brandName,
             @RequestBody ArticleCartList articleCartList);
 
-    @GetMapping("/products/get-all")
-    List<Product> getAllProducts();//lina 203 se ve el endpont en productos
+    @GetMapping("/api/article/get-all-articles")
+    List<ArticleModel> getAllArticles();
 
     @GetMapping("/api/article/{articleId}/check-quantity/{quantity}")
     boolean isStockSufficient(@PathVariable Long articleId, @PathVariable Integer quantity);
