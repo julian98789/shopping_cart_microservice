@@ -7,6 +7,7 @@ import com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.j
 import com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.jpa.repository.ICartRepository;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -16,7 +17,7 @@ public class CartJpaAdapter implements ICartModelPersistencePort {
     private final ICartRepository cartRepository;
 
     @Override
-    public CartModel addProductToCart(CartModel cartModel) {
+    public CartModel addArticleToCart(CartModel cartModel) {
         CartEntity cartEntity = cartRepository.save(cartEntityMapper.cartModelToCartEntity(cartModel));
         return cartEntityMapper.cartEntityToCartModel(cartEntity);
     }
@@ -31,5 +32,20 @@ public class CartJpaAdapter implements ICartModelPersistencePort {
         return cartRepository.findByUserId(userId).stream()
                 .map(CartEntity::getArticleId)
                 .toList();
+    }
+
+    @Override
+    public void removeArticleFromCart(Long userId, Long articleId) {
+        CartEntity cartEntity = cartRepository.findByUserIdAndArticleId(userId, articleId);
+        cartRepository.delete(cartEntity);
+    }
+
+    @Override
+    public void updateCartItemsUpdatedAt(Long userId, LocalDate lastUpdatedDate) {
+        List<CartEntity> cartEntities = cartRepository.findByUserId(userId);
+        for (CartEntity cartEntity : cartEntities) {
+            cartEntity.setLastUpdatedDate(lastUpdatedDate);
+            cartRepository.save(cartEntity);
+        }
     }
 }

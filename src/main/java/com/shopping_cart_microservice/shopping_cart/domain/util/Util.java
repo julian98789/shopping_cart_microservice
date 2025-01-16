@@ -18,7 +18,7 @@ public class Util {
     public static final String NEXT_SUPPLY_DATE_KEY = "nextSupplyDate";
     public static final String INSUFFICIENT_STOCK = "Stock insuficiente";
     public static final String CATEGORIES_LIMIT_EXCEEDED = "Se ha excedido el límite de categorías para la categoría: ";
-
+    public static final String ARTICLE_DELETED_SUCCESSFULLY = "Articulo eliminado del carrito exitosamente";
     public static final int TOKEN_PREFIX_LENGTH = 7;
     public static final String DATE_FORMAT = "yyyy-MM-dd";
     public static final int  ARTICLE_QUANTITY_MIN = 1;

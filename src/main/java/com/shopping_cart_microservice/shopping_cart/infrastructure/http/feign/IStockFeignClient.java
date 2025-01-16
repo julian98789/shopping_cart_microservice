@@ -17,7 +17,7 @@ import java.util.List;
 public interface IStockFeignClient {
 
     @GetMapping("/api/article/{articleId}")
-    boolean getArticleById(@PathVariable Long articleId);
+    boolean articleExistsById(@PathVariable Long articleId);
 
     @GetMapping("/api/category/names-by-article/{articleId}")
     List<String> getCategoryNamesByArticleId(@PathVariable Long articleId);

@@ -25,14 +25,16 @@ public class CartUseCase implements ICartModelServicePort {
     private final ICartModelPersistencePort cartPersistencePort;
     private final IStockConnectionPersistencePort stockConnectionPersistencePort;
     private final ISupplyConnectionPersistencePort supplyConnectionPersistencePort;
+    private final IAuthenticationSecurityPort authenticationPersistencePort;
 
     private static final Logger logger = LoggerFactory.getLogger(StockConnectionAdapter.class);
 
-    public CartUseCase( ICartModelPersistencePort cartPersistencePort, IStockConnectionPersistencePort stockConnectionPersistencePort, ISupplyConnectionPersistencePort supplyConnectionPersistencePort) {
+    public CartUseCase(ICartModelPersistencePort cartPersistencePort, IStockConnectionPersistencePort stockConnectionPersistencePort, ISupplyConnectionPersistencePort supplyConnectionPersistencePort, IAuthenticationSecurityPort authenticationPersistencePort) {
 
         this.cartPersistencePort = cartPersistencePort;
         this.stockConnectionPersistencePort = stockConnectionPersistencePort;
         this.supplyConnectionPersistencePort = supplyConnectionPersistencePort;
+        this.authenticationPersistencePort = authenticationPersistencePort;
     }
 
     @Override
@@ -58,7 +60,18 @@ public class CartUseCase implements ICartModelServicePort {
 
         createNewCart(cartModel);
 
-        return cartPersistencePort.addProductToCart(cartModel);
+        return cartPersistencePort.addArticleToCart(cartModel);
+    }
+
+    @Override
+    public void removeProductToCart(Long productId) {
+        Long userId = authenticationPersistencePort.getAuthenticatedUserId();
+        CartModel existingCart = cartPersistencePort.findArticleByUserIdAndArticleId(userId, productId);
+        if (existingCart == null) {
+            throw new NotFoundException(Util.ARTICLE_NOT_FOUND);
+        }
+        cartPersistencePort.removeArticleFromCart(userId,productId);
+        cartPersistencePort.updateCartItemsUpdatedAt(userId, LocalDate.now());
     }
 
     private void createNewCart(CartModel cartModel) {
@@ -81,7 +94,7 @@ public class CartUseCase implements ICartModelServicePort {
     private void updateExistingCart(CartModel existingCart, int quantityToAdd) {
         existingCart.setQuantity(existingCart.getQuantity() + quantityToAdd);
         existingCart.setLastUpdatedDate(LocalDate.now());
-        cartPersistencePort.addProductToCart(existingCart);
+        cartPersistencePort.addArticleToCart(existingCart);
     }
 
     private void checkCategoriesLimit(List<Long> articleIds) {

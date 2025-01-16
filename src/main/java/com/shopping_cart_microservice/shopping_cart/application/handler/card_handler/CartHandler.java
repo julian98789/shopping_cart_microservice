@@ -31,4 +31,9 @@ public class CartHandler implements ICartHandler{
 
         return cartResponseMapper.cartModelToCartResponse(saveCart);
     }
+
+    @Override
+    public void removeProductToCart(Long productId) {
+        cartServicePort.removeProductToCart(productId);
+    }
 }

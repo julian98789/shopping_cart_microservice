@@ -19,7 +19,7 @@ public class StockConnectionAdapter implements IStockConnectionPersistencePort {
     public boolean existById(Long articleId) {
         try {
             logger.info("El ID del articulo es: {}", articleId);
-            return stockFeignClient.getArticleById(articleId);
+            return stockFeignClient.articleExistsById(articleId);
         } catch (FeignException.NotFound e) {
             return false;
         }
