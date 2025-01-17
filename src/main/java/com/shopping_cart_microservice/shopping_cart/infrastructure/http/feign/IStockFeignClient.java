@@ -1,8 +1,8 @@
 package com.shopping_cart_microservice.shopping_cart.infrastructure.http.feign;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.stock_dto.ArticleCartList;
-import com.shopping_cart_microservice.shopping_cart.application.dto.stock_dto.ArticleDetailsCartResponse;
-import com.shopping_cart_microservice.shopping_cart.domain.model.ArticleModel;
+import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleCartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.domain.model.ArticleDetailsCartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -30,10 +30,10 @@ public interface IStockFeignClient {
             @RequestParam(defaultValue = "true") boolean ascending,
             @RequestParam(required = false) String categoryName,
             @RequestParam(required = false) String brandName,
-            @RequestBody ArticleCartList articleCartList);
+            @RequestBody ArticleCartRequest articleCartRequest);
 
     @GetMapping("/api/article/get-all-articles")
-    List<ArticleModel> getAllArticles();
+    List<ArticleDetailsCartModel> getAllArticles();
 
     @GetMapping("/api/article/{articleId}/check-quantity/{quantity}")
     boolean isStockSufficient(@PathVariable Long articleId, @PathVariable Integer quantity);

@@ -1,5 +1,7 @@
 package com.shopping_cart_microservice.shopping_cart.domain.usecase;
 
+import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleCartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
 import com.shopping_cart_microservice.shopping_cart.domain.api.ICartModelServicePort;
 import com.shopping_cart_microservice.shopping_cart.domain.exception.CategoriesLimitException;
 import com.shopping_cart_microservice.shopping_cart.domain.exception.InsufficientStockException;
@@ -9,16 +11,13 @@ import com.shopping_cart_microservice.shopping_cart.domain.security.IAuthenticat
 import com.shopping_cart_microservice.shopping_cart.domain.spi.ICartModelPersistencePort;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.IStockConnectionPersistencePort;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.ISupplyConnectionPersistencePort;
+import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
-import com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.jpa.adapter.StockConnectionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CartUseCase implements ICartModelServicePort {
 
@@ -27,10 +26,9 @@ public class CartUseCase implements ICartModelServicePort {
     private final ISupplyConnectionPersistencePort supplyConnectionPersistencePort;
     private final IAuthenticationSecurityPort authenticationPersistencePort;
 
-    private static final Logger logger = LoggerFactory.getLogger(StockConnectionAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(CartUseCase.class);
 
     public CartUseCase(ICartModelPersistencePort cartPersistencePort, IStockConnectionPersistencePort stockConnectionPersistencePort, ISupplyConnectionPersistencePort supplyConnectionPersistencePort, IAuthenticationSecurityPort authenticationPersistencePort) {
-
         this.cartPersistencePort = cartPersistencePort;
         this.stockConnectionPersistencePort = stockConnectionPersistencePort;
         this.supplyConnectionPersistencePort = supplyConnectionPersistencePort;
@@ -39,44 +37,54 @@ public class CartUseCase implements ICartModelServicePort {
 
     @Override
     public CartModel addArticleToCart(CartModel cartModel) {
-
+        Long userId = authenticationPersistencePort.getAuthenticatedUserId();
+        cartModel.setUserId(userId);
         validateProductExistence(cartModel.getArticleId());
+        CartModel existingCart = findExistingCart(cartModel);
 
-        CartModel existingCart = cartPersistencePort.findArticleByUserIdAndArticleId(cartModel.getUserId(), cartModel.getArticleId());
+        int totalQuantity = cartModel.getQuantity() + (existingCart != null ? existingCart.getQuantity() : 0);
+        validateStockAvailability(cartModel.getArticleId(), totalQuantity);
 
-        int totalQuantity = cartModel.getQuantity();
         if (existingCart != null) {
-            totalQuantity += existingCart.getQuantity();
-            validateStockAvailability(cartModel.getArticleId(), totalQuantity);
             updateExistingCart(existingCart, cartModel.getQuantity());
             return existingCart;
         }
 
-        validateStockAvailability(cartModel.getArticleId(), totalQuantity);
-
-        List<Long> productsCart = new ArrayList<>(cartPersistencePort.findArticleIdsByUserId(cartModel.getUserId()));
-        productsCart.add(cartModel.getArticleId());
-        checkCategoriesLimit(productsCart);
-
+        checkCategoriesLimit(cartModel.getUserId(), cartModel.getArticleId());
         createNewCart(cartModel);
 
         return cartPersistencePort.addArticleToCart(cartModel);
     }
 
     @Override
-    public void removeProductToCart(Long productId) {
+    public void removeProductToCart(Long articleId) {
         Long userId = authenticationPersistencePort.getAuthenticatedUserId();
-        CartModel existingCart = cartPersistencePort.findArticleByUserIdAndArticleId(userId, productId);
+        CartModel existingCart = cartPersistencePort.findArticleByUserIdAndArticleId(userId, articleId);
+
         if (existingCart == null) {
             throw new NotFoundException(Util.ARTICLE_NOT_FOUND);
         }
-        cartPersistencePort.removeArticleFromCart(userId,productId);
+
+        cartPersistencePort.removeArticleFromCart(userId, articleId);
         cartPersistencePort.updateCartItemsUpdatedAt(userId, LocalDate.now());
     }
 
-    private void createNewCart(CartModel cartModel) {
-        cartModel.setCreationDate(LocalDate.now());
-        cartModel.setLastUpdatedDate(LocalDate.now());
+    @Override
+    public Paginated<ArticleDetailsCartResponse> findArticleIdsByUserId(int page, int size, String sort, boolean ascending, String categoryName, String brandName) {
+        Long userId = authenticationPersistencePort.getAuthenticatedUserId();
+        List<Long> articleIds = cartPersistencePort.findArticleIdsByUserId(userId);
+
+        if (articleIds.isEmpty()) {
+            return new Paginated<>(Collections.emptyList(), 0, page, size);
+        }
+
+        return getPaginatedArticles(page, size, sort, ascending, categoryName, brandName, articleIds, userId);
+    }
+
+    // ---------------------------- Metodos auxiliares ----------------------------
+
+    private CartModel findExistingCart(CartModel cartModel) {
+        return cartPersistencePort.findArticleByUserIdAndArticleId(cartModel.getUserId(), cartModel.getArticleId());
     }
 
     private void validateProductExistence(Long articleId) {
@@ -84,6 +92,7 @@ public class CartUseCase implements ICartModelServicePort {
             throw new NotFoundException(Util.ARTICLE_NOT_FOUND);
         }
     }
+
     private void validateStockAvailability(Long articleId, int totalQuantity) {
         if (!stockConnectionPersistencePort.isStockSufficient(articleId, totalQuantity)) {
             String nextSupplyDate = supplyConnectionPersistencePort.getNextSupplyDate(articleId);
@@ -97,23 +106,68 @@ public class CartUseCase implements ICartModelServicePort {
         cartPersistencePort.addArticleToCart(existingCart);
     }
 
-    private void checkCategoriesLimit(List<Long> articleIds) {
+    private void checkCategoriesLimit(Long userId, Long articleId) {
+        List<Long> productsCart = new ArrayList<>(cartPersistencePort.findArticleIdsByUserId(userId));
+        productsCart.add(articleId);
+        Map<String, Integer> categoryCountMap = countArticleCategories(productsCart);
+        checkIfCategoriesExceedLimit(categoryCountMap);
+    }
+
+    private Map<String, Integer> countArticleCategories(List<Long> articleIds) {
         Map<String, Integer> categoryCountMap = new HashMap<>();
         for (Long articleId : articleIds) {
             List<String> categories = stockConnectionPersistencePort.getCategoryNamesByarticleId(articleId);
-            updateCategoryCountMap(categoryCountMap, categories);
+            categories.forEach(category -> categoryCountMap.put(category, categoryCountMap.getOrDefault(category, 0) + 1));
         }
+        return categoryCountMap;
     }
 
-    private void updateCategoryCountMap(Map<String, Integer> categoryCountMap, List<String> categories) {
-        for (String category : categories) {
-            categoryCountMap.put(category, categoryCountMap.getOrDefault(category, 0) + 1);
-            if (categoryCountMap.get(category) > 3) {
+    private void checkIfCategoriesExceedLimit(Map<String, Integer> categoryCountMap) {
+        categoryCountMap.forEach((category, count) -> {
+            if (count > 3) {
                 throw new CategoriesLimitException(Util.CATEGORIES_LIMIT_EXCEEDED + category);
             }
+        });
+    }
+
+    private void createNewCart(CartModel cartModel) {
+        cartModel.setCreationDate(LocalDate.now());
+        cartModel.setLastUpdatedDate(LocalDate.now());
+    }
+
+    private Paginated<ArticleDetailsCartResponse> getPaginatedArticles(int page, int size, String sort, boolean ascending, String categoryName, String brandName, List<Long> articleIds, Long userId) {
+        ArticleCartRequest articleCartRequest = new ArticleCartRequest(articleIds);
+        Paginated<ArticleDetailsCartResponse> paginatedArticles = stockConnectionPersistencePort.getAllArticlesPaginatedByIds(
+                page, size, sort, ascending, categoryName, brandName, articleCartRequest);
+
+        paginatedArticles.getContent().forEach(article -> {
+            updateArticleDetails(userId, article);
+        });
+
+        return paginatedArticles;
+    }
+
+    private void updateArticleDetails(Long userId, ArticleDetailsCartResponse article) {
+        CartModel cart = cartPersistencePort.findArticleByUserIdAndArticleId(userId, article.getId());
+        if (cart != null) {
+            article.setCartQuantity(cart.getQuantity());
+            article.setSubtotal(article.getPrice() * cart.getQuantity());
+            boolean isStockSufficient = stockConnectionPersistencePort.isStockSufficient(article.getId(), cart.getQuantity());
+
+            if (!isStockSufficient) {
+                String nextSupplyDate = supplyConnectionPersistencePort.getNextSupplyDate(article.getId());
+                article.setNextSupplyDate(nextSupplyDate != null ? nextSupplyDate : "N/A");
+            } else {
+                article.setNextSupplyDate(null);
+            }
+        } else {
+            article.setCartQuantity(0);
+            article.setSubtotal(0.0);
+            article.setNextSupplyDate(null);
         }
     }
 }
+
 
 
 

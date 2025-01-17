@@ -1,9 +1,9 @@
 package com.shopping_cart_microservice.shopping_cart.domain.model;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.stock_dto.BrandResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.brand_dto.BrandResponse;
 
 
-public class ArticleModel {
+public class ArticleDetailsCartModel {
 
     private Long id;
     private String name;
@@ -15,8 +15,8 @@ public class ArticleModel {
     private String nextSupplyDate;
     private Double subtotal;
 
-    public ArticleModel(Long id, String name, String description, Integer quantity, double price,
-                        BrandResponse brand, Integer cartQuantity, String nextSupplyDate, Double subtotal) {
+    public ArticleDetailsCartModel(Long id, String name, String description, Integer quantity, double price,
+                                   BrandResponse brand, Integer cartQuantity, String nextSupplyDate, Double subtotal) {
         this.id = id;
         this.name = name;
         this.description = description;

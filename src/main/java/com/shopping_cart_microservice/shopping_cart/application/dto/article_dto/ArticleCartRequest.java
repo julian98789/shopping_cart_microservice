@@ -1,8 +1,7 @@
-package com.shopping_cart_microservice.shopping_cart.application.dto.stock_dto;
+package com.shopping_cart_microservice.shopping_cart.application.dto.article_dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -10,8 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
-public class ArticleCartList {
+public class ArticleCartRequest {
 
     private List<Long> articleIds;
 }

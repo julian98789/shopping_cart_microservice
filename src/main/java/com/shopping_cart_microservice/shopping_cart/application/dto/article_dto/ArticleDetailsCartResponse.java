@@ -1,6 +1,8 @@
-package com.shopping_cart_microservice.shopping_cart.application.dto.stock_dto;
+package com.shopping_cart_microservice.shopping_cart.application.dto.article_dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.shopping_cart_microservice.shopping_cart.application.dto.brand_dto.BrandResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.category_dto.CategoryResponseForArticle;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,6 +1,9 @@
 package com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.jpa.adapter;
 
+import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleCartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.IStockConnectionPersistencePort;
+import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.infrastructure.http.feign.IStockFeignClient;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +44,14 @@ public class StockConnectionAdapter implements IStockConnectionPersistencePort {
         } catch (FeignException.NotFound e) {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Paginated<ArticleDetailsCartResponse> getAllArticlesPaginatedByIds(int page, int size,
+                                                                              String sort, boolean ascending,
+                                                                              String categoryName, String brandName,
+                                                                              ArticleCartRequest articleCartRequest) {
+
+        return stockFeignClient.getArticlesCart(page, size, sort, ascending, categoryName, brandName, articleCartRequest);
     }
 }
