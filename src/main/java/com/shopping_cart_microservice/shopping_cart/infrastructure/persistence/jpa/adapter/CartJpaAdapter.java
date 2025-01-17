@@ -1,6 +1,6 @@
 package com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.jpa.adapter;
 
-import com.shopping_cart_microservice.shopping_cart.domain.model.CartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.cart.CartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.ICartModelPersistencePort;
 import com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.jpa.entity.CartEntity;
 import com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.jpa.mapper.ICartEntityMapper;

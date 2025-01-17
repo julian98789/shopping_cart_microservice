@@ -37,7 +37,7 @@ public class CartController {
     }
 
     @PreAuthorize(Util.ROLE_CLIENT )
-    @DeleteMapping("/delete-article-from-cart_mapper/{articleId}")
+    @DeleteMapping("/delete-article-from-cart/{articleId}")
     public ResponseEntity<String> removeArticleFromCart(@PathVariable Long articleId) {
         cartHandler.removeProductToCart(articleId);
         return ResponseEntity.status(HttpStatus.OK).body(Util.ARTICLE_DELETED_SUCCESSFULLY);

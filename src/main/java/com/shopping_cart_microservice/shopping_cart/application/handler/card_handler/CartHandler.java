@@ -7,11 +7,14 @@ import com.shopping_cart_microservice.shopping_cart.application.mapper.article_m
 import com.shopping_cart_microservice.shopping_cart.application.mapper.cart_mapper.ICartRequestMapper;
 import com.shopping_cart_microservice.shopping_cart.application.mapper.cart_mapper.ICartResponseMapper;
 import com.shopping_cart_microservice.shopping_cart.domain.api.ICartModelServicePort;
-import com.shopping_cart_microservice.shopping_cart.domain.model.CartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.stock.article.ArticleDetailsCartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.cart.CartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -39,7 +42,13 @@ public class CartHandler implements ICartHandler{
 
     @Override
     public Paginated<ArticleDetailsCartResponse> getAllArticlesPaginatedByIds(int page, int size, String sort, boolean ascending, String categoryName, String brandName) {
+        Paginated<ArticleDetailsCartModel> articles = cartServicePort.findArticleIdsByUserId(
+                page, size, sort, ascending, categoryName, brandName);
 
-        return cartServicePort.findArticleIdsByUserId(page, size, sort, ascending, categoryName, brandName);
+        List<ArticleDetailsCartResponse> responseList = articles.getContent().stream()
+                .map(articleResponseMapper::articleModelToArticleDetailsCartResponse)
+                .toList();
+
+        return new Paginated<>(responseList, page, size, articles.getTotalElements());
     }
 }

@@ -2,7 +2,7 @@ package com.shopping_cart_microservice.shopping_cart.infrastructure.http.feign;
 
 import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleCartRequest;
 import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
-import com.shopping_cart_microservice.shopping_cart.domain.model.ArticleDetailsCartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.stock.article.ArticleDetailsCartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
 import org.springframework.cloud.openfeign.FeignClient;

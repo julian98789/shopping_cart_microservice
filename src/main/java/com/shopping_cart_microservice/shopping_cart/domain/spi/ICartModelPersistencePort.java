@@ -1,6 +1,6 @@
 package com.shopping_cart_microservice.shopping_cart.domain.spi;
 
-import com.shopping_cart_microservice.shopping_cart.domain.model.CartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.cart.CartModel;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.shopping_cart_microservice.shopping_cart.domain.model;
+package com.shopping_cart_microservice.shopping_cart.domain.model.stock.article;
 
 import java.util.List;
 

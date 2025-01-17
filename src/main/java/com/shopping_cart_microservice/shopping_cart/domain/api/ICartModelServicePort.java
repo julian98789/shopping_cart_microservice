@@ -1,7 +1,7 @@
 package com.shopping_cart_microservice.shopping_cart.domain.api;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
-import com.shopping_cart_microservice.shopping_cart.domain.model.CartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.stock.article.ArticleDetailsCartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.cart.CartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 
 public interface ICartModelServicePort {
@@ -10,7 +10,7 @@ public interface ICartModelServicePort {
 
     void removeProductToCart(Long productId );
 
-    Paginated<ArticleDetailsCartResponse> findArticleIdsByUserId(
+    Paginated<ArticleDetailsCartModel> findArticleIdsByUserId(
             int page, int size, String sort, boolean ascending, String categoryName, String brandName);
 
 }

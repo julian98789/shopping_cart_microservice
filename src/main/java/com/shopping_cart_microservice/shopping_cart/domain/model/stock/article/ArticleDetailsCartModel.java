@@ -1,6 +1,9 @@
-package com.shopping_cart_microservice.shopping_cart.domain.model;
+package com.shopping_cart_microservice.shopping_cart.domain.model.stock.article;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.brand_dto.BrandResponse;
+import com.shopping_cart_microservice.shopping_cart.domain.model.stock.brand.BrandModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.stock.category.CategoryModel;
+
+import java.util.List;
 
 
 public class ArticleDetailsCartModel {
@@ -10,19 +13,24 @@ public class ArticleDetailsCartModel {
     private String description;
     private Integer quantity;
     private double price;
-    private BrandResponse brand;
+    private BrandModel brand;
+    private List<CategoryModel> categories;
     private Integer cartQuantity;
     private String nextSupplyDate;
     private Double subtotal;
 
-    public ArticleDetailsCartModel(Long id, String name, String description, Integer quantity, double price,
-                                   BrandResponse brand, Integer cartQuantity, String nextSupplyDate, Double subtotal) {
+    public ArticleDetailsCartModel(
+            Long id, String name, String description, Integer quantity,
+            double price, BrandModel brand, List<CategoryModel> categories,
+            Integer cartQuantity, String nextSupplyDate, Double subtotal) {
+
         this.id = id;
         this.name = name;
         this.description = description;
         this.quantity = quantity;
         this.price = price;
         this.brand = brand;
+        this.categories = categories;
         this.cartQuantity = cartQuantity;
         this.nextSupplyDate = nextSupplyDate;
         this.subtotal = subtotal;
@@ -68,12 +76,20 @@ public class ArticleDetailsCartModel {
         this.price = price;
     }
 
-    public BrandResponse getBrand() {
+    public BrandModel getBrand() {
         return brand;
     }
 
-    public void setBrand(BrandResponse brand) {
+    public void setBrand(BrandModel brand) {
         this.brand = brand;
+    }
+
+    public List<CategoryModel> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<CategoryModel> categories) {
+        this.categories = categories;
     }
 
     public Integer getCartQuantity() {

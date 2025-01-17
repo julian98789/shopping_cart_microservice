@@ -1,12 +1,12 @@
 package com.shopping_cart_microservice.shopping_cart.domain.usecase;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleCartRequest;
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
 import com.shopping_cart_microservice.shopping_cart.domain.api.ICartModelServicePort;
 import com.shopping_cart_microservice.shopping_cart.domain.exception.CategoriesLimitException;
 import com.shopping_cart_microservice.shopping_cart.domain.exception.InsufficientStockException;
 import com.shopping_cart_microservice.shopping_cart.domain.exception.NotFoundException;
-import com.shopping_cart_microservice.shopping_cart.domain.model.CartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.stock.article.ArticleCartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.stock.article.ArticleDetailsCartModel;
+import com.shopping_cart_microservice.shopping_cart.domain.model.cart.CartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.security.IAuthenticationSecurityPort;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.ICartModelPersistencePort;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.IStockConnectionPersistencePort;
@@ -70,7 +70,7 @@ public class CartUseCase implements ICartModelServicePort {
     }
 
     @Override
-    public Paginated<ArticleDetailsCartResponse> findArticleIdsByUserId(int page, int size, String sort, boolean ascending, String categoryName, String brandName) {
+    public Paginated<ArticleDetailsCartModel> findArticleIdsByUserId(int page, int size, String sort, boolean ascending, String categoryName, String brandName) {
         Long userId = authenticationPersistencePort.getAuthenticatedUserId();
         List<Long> articleIds = cartPersistencePort.findArticleIdsByUserId(userId);
 
@@ -135,23 +135,25 @@ public class CartUseCase implements ICartModelServicePort {
         cartModel.setLastUpdatedDate(LocalDate.now());
     }
 
-    private Paginated<ArticleDetailsCartResponse> getPaginatedArticles(int page, int size, String sort, boolean ascending, String categoryName, String brandName, List<Long> articleIds, Long userId) {
-        ArticleCartRequest articleCartRequest = new ArticleCartRequest(articleIds);
-        Paginated<ArticleDetailsCartResponse> paginatedArticles = stockConnectionPersistencePort.getAllArticlesPaginatedByIds(
-                page, size, sort, ascending, categoryName, brandName, articleCartRequest);
+    private Paginated<ArticleDetailsCartModel> getPaginatedArticles(
+            int page, int size, String sort, boolean ascending, String categoryName,
+            String brandName, List<Long> articleIds, Long userId) {
 
-        paginatedArticles.getContent().forEach(article -> {
-            updateArticleDetails(userId, article);
-        });
+        ArticleCartModel articleCartModel = new ArticleCartModel(articleIds);
+        Paginated<ArticleDetailsCartModel> paginatedArticles = stockConnectionPersistencePort.getAllArticlesPaginatedByIds(
+                page, size, sort, ascending, categoryName, brandName, articleCartModel);
 
+        paginatedArticles.getContent().forEach(article -> updateArticleDetails(userId, article));
         return paginatedArticles;
     }
 
-    private void updateArticleDetails(Long userId, ArticleDetailsCartResponse article) {
+    private void updateArticleDetails(Long userId, ArticleDetailsCartModel article) {
         CartModel cart = cartPersistencePort.findArticleByUserIdAndArticleId(userId, article.getId());
         if (cart != null) {
             article.setCartQuantity(cart.getQuantity());
             article.setSubtotal(article.getPrice() * cart.getQuantity());
+
+
             boolean isStockSufficient = stockConnectionPersistencePort.isStockSufficient(article.getId(), cart.getQuantity());
 
             if (!isStockSufficient) {
