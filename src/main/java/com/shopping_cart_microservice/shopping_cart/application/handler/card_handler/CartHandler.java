@@ -3,6 +3,7 @@ package com.shopping_cart_microservice.shopping_cart.application.handler.card_ha
 import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartRequest;
 import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartResponse;
 import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartUpdateQuantityRequest;
 import com.shopping_cart_microservice.shopping_cart.application.mapper.article_mapper.IArticleResponseMapper;
 import com.shopping_cart_microservice.shopping_cart.application.mapper.cart_mapper.ICartRequestMapper;
 import com.shopping_cart_microservice.shopping_cart.application.mapper.cart_mapper.ICartResponseMapper;
@@ -67,5 +68,17 @@ public class CartHandler implements ICartHandler{
     @Override
     public String getLatestCartUpdateDate() {
         return cartServicePort.getLatestCartUpdateDate();
+    }
+
+    @Override
+    public CartResponse updateCartQuantity(CartUpdateQuantityRequest cartRequest) {
+
+        CartModel cartModel = cartRequestMapper.cartUpdateRequestToCartModel(cartRequest);
+
+        // Llamamos al servicio que contiene la lógica de negocio
+        CartModel updatedCartModel = cartServicePort.updateCartQuantity(cartModel);
+
+        // Mapeamos el modelo a la respuesta
+        return cartResponseMapper.cartModelToCartResponse(updatedCartModel);
     }
 }

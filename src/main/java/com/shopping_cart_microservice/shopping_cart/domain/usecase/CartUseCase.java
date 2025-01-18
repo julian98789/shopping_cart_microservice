@@ -102,6 +102,27 @@ public class CartUseCase implements ICartModelServicePort {
         return formatDate(lastUpdatedDate);
     }
 
+    @Override
+    public CartModel updateCartQuantity(CartModel cartModel) {
+        Long userId = authenticationPersistencePort.getAuthenticatedUserId();
+        CartModel existingCart = cartPersistencePort.findArticleByUserIdAndArticleId(userId, cartModel.getArticleId());
+
+        if (existingCart == null) {
+            throw new NotFoundException(Util.ARTICLE_NOT_FOUND);
+        }
+
+        int totalQuantity = cartModel.getQuantity() + existingCart.getQuantity();
+
+        validateStockAvailability(cartModel.getArticleId(), totalQuantity);
+
+        existingCart.setQuantity(cartModel.getQuantity());
+        existingCart.setLastUpdatedDate(LocalDate.now());
+
+        return cartPersistencePort.addArticleToCart(existingCart);
+    }
+
+
+
     // ---------------------------- Metodos auxiliares ----------------------------
 
     private CartModel findExistingCart(CartModel cartModel) {

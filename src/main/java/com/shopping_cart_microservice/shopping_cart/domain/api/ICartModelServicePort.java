@@ -20,4 +20,6 @@ public interface ICartModelServicePort {
     void deleteCart();
 
     String getLatestCartUpdateDate();
+
+    CartModel updateCartQuantity(CartModel cartModel);
 }

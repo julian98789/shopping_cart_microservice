@@ -3,6 +3,7 @@ package com.shopping_cart_microservice.shopping_cart.infrastructure.http.control
 import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartRequest;
 import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartResponse;
 import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartUpdateQuantityRequest;
 import com.shopping_cart_microservice.shopping_cart.application.handler.card_handler.ICartHandler;
 import com.shopping_cart_microservice.shopping_cart.application.mapper.cart_mapper.ICartResponseMapper;
 import com.shopping_cart_microservice.shopping_cart.domain.api.ICartModelServicePort;
@@ -83,6 +84,15 @@ public class CartController {
     public ResponseEntity<String> getLatestCartUpdateDate() {
         String latestUpdateDate = cartHandler.getLatestCartUpdateDate();
         return ResponseEntity.ok(latestUpdateDate);
+    }
+
+    @PreAuthorize(Util.ROLE_CLIENT)
+    @PatchMapping("/update-quantity")
+    public ResponseEntity<CartResponse> updateProductQuantity(@RequestBody CartUpdateQuantityRequest cartRequest) {
+
+        CartResponse cartResponse = cartHandler.updateCartQuantity(cartRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartResponse);
     }
 
 }
