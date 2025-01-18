@@ -51,4 +51,21 @@ public class CartHandler implements ICartHandler{
 
         return new Paginated<>(responseList, page, size, articles.getTotalElements());
     }
+
+    @Override
+    public List<CartResponse> findCartByUserId() {
+
+        List<CartModel> cartModels = cartServicePort.findCartByUserId();
+        return cartResponseMapper.cartModelListToCartResponseList(cartModels);
+    }
+
+    @Override
+    public void deleteCart() {
+        cartServicePort.deleteCart();
+    }
+
+    @Override
+    public String getLatestCartUpdateDate() {
+        return cartServicePort.getLatestCartUpdateDate();
+    }
 }

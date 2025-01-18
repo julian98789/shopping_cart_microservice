@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class CartUseCase implements ICartModelServicePort {
@@ -81,10 +83,35 @@ public class CartUseCase implements ICartModelServicePort {
         return getPaginatedArticles(page, size, sort, ascending, categoryName, brandName, articleIds, userId);
     }
 
+    @Override
+    public List<CartModel> findCartByUserId() {
+        Long userId = authenticationPersistencePort.getAuthenticatedUserId();
+        return cartPersistencePort.findCartByUserId(userId);
+    }
+
+    @Override
+    public void deleteCart() {
+        Long userId = authenticationPersistencePort.getAuthenticatedUserId();
+        cartPersistencePort.deleteCart(userId);
+    }
+
+    @Override
+    public String getLatestCartUpdateDate() {
+        Long userId = authenticationPersistencePort.getAuthenticatedUserId();
+        LocalDate lastUpdatedDate = cartPersistencePort.getLatestCartUpdateDate(userId);
+        return formatDate(lastUpdatedDate);
+    }
+
     // ---------------------------- Metodos auxiliares ----------------------------
 
     private CartModel findExistingCart(CartModel cartModel) {
         return cartPersistencePort.findArticleByUserIdAndArticleId(cartModel.getUserId(), cartModel.getArticleId());
+    }
+
+    private String formatDate(LocalDate date) {
+        LocalDateTime localDateTime = date.atStartOfDay();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        return localDateTime.format(formatter);
     }
 
     private void validateProductExistence(Long articleId) {

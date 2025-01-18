@@ -23,6 +23,8 @@ public class Util {
     public static final String DATE_FORMAT = "yyyy-MM-dd";
     public static final int  ARTICLE_QUANTITY_MIN = 1;
     public static final String  ARTICLE_QUANTITY_MIN_MESSAGE = "La cantidad debe ser mayor a 0";
+    public static final String DELETE_CART_RESPONSE_BODY = "Carrito eliminado exitosamente";
+
     private Util() {
     }
 }

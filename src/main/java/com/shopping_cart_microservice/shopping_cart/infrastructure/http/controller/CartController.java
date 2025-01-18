@@ -4,6 +4,8 @@ import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.Car
 import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartResponse;
 import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
 import com.shopping_cart_microservice.shopping_cart.application.handler.card_handler.ICartHandler;
+import com.shopping_cart_microservice.shopping_cart.application.mapper.cart_mapper.ICartResponseMapper;
+import com.shopping_cart_microservice.shopping_cart.domain.api.ICartModelServicePort;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
 import jakarta.validation.Valid;
@@ -11,21 +13,22 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
 public class CartController {
 
-
     private final ICartHandler cartHandler;
-    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
+    private final ICartResponseMapper cartResponseMapper;
+    private final ICartModelServicePort cartModelServicePort;
+
 
     @PreAuthorize(Util.ROLE_CLIENT )
     @PostMapping("/add-article-to-card")
@@ -57,6 +60,29 @@ public class CartController {
                 page, size, sort, ascending, categoryName, brandName);
 
         return new ResponseEntity<>(articles, HttpStatus.OK);
+    }
+
+    @PreAuthorize(Util.ROLE_CLIENT)
+    @GetMapping("get-cart-by-user")
+    public ResponseEntity<List<CartResponse>> buyProducts(){
+
+        List<CartResponse> cartByUserId = cartHandler.findCartByUserId();
+
+        return ResponseEntity.status(HttpStatus.OK).body(cartByUserId);
+    }
+
+    @PreAuthorize(Util.ROLE_CLIENT)
+    @DeleteMapping("/delete-cart")
+    public ResponseEntity<String> deleteCart(){
+        cartHandler.deleteCart();
+        return ResponseEntity.status(HttpStatus.OK).body(Util.DELETE_CART_RESPONSE_BODY);
+    }
+
+    @PreAuthorize(Util.ROLE_CLIENT)
+    @GetMapping("/latest-update")
+    public ResponseEntity<String> getLatestCartUpdateDate() {
+        String latestUpdateDate = cartHandler.getLatestCartUpdateDate();
+        return ResponseEntity.ok(latestUpdateDate);
     }
 
 }

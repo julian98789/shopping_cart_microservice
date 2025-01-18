@@ -16,4 +16,10 @@ public interface ICartModelPersistencePort {
     void removeArticleFromCart(Long userId, Long articleId);
 
     void updateCartItemsUpdatedAt (Long userId, LocalDate lastUpdatedDate);
+
+    List<CartModel> findCartByUserId(Long userId);
+
+    void deleteCart(Long userId);
+
+    LocalDate getLatestCartUpdateDate(Long userId);
 }

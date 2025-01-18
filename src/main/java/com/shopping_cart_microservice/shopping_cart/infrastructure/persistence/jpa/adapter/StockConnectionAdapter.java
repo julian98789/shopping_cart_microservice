@@ -21,7 +21,7 @@ import java.util.List;
 public class StockConnectionAdapter implements IStockConnectionPersistencePort {
 
     private final IStockFeignClient stockFeignClient;
-    private final IArticleRequestMapper articleRequestMapper; // Mapper ya creado con MapStruct
+    private final IArticleRequestMapper articleRequestMapper;
     private final IArticleResponseMapper articleResponseMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(StockConnectionAdapter.class);
@@ -58,14 +58,11 @@ public class StockConnectionAdapter implements IStockConnectionPersistencePort {
             int page, int size, String sort, boolean ascending,
             String categoryName, String brandName, ArticleCartModel cartModel) {
 
-            // Mapea el modelo al DTO usando IArticleRequestMapper
             ArticleCartRequest articleCartRequest = articleRequestMapper.articleCartModelToArticleCartRequest(cartModel);
 
-            // Llama al cliente Feign y obtiene la respuesta
             Paginated<ArticleDetailsCartResponse> paginatedResponse = stockFeignClient.getArticlesCart(
                     page, size, sort, ascending, categoryName, brandName, articleCartRequest);
 
-            // Convierte los DTOs a modelos del dominio usando IArticleResponseMapper
             List<ArticleDetailsCartModel> content = paginatedResponse.getContent().stream()
                     .map(articleResponseMapper::articleDetailsCartResponseToArticleDetailsCartModel)
                     .toList();
@@ -73,7 +70,5 @@ public class StockConnectionAdapter implements IStockConnectionPersistencePort {
         return new Paginated<>(content, page, size, paginatedResponse.getTotalElements());
 
     }
-
-
 
 }

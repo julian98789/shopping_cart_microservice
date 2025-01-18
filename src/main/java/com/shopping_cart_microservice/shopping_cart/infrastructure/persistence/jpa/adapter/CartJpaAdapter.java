@@ -48,4 +48,19 @@ public class CartJpaAdapter implements ICartModelPersistencePort {
             cartRepository.save(cartEntity);
         }
     }
+
+    @Override
+    public List<CartModel> findCartByUserId(Long userId) {
+        return cartEntityMapper.cartEntitiesListToCartModelsList(cartRepository.findByUserId(userId));
+    }
+
+    @Override
+    public void deleteCart(Long userId) {
+        cartRepository.deleteByUserId(userId);
+    }
+
+    @Override
+    public LocalDate getLatestCartUpdateDate(Long userId) {
+        return cartRepository.findTopByUserIdOrderByLastUpdatedDateDesc(userId).getLastUpdatedDate();
+    }
 }

@@ -4,6 +4,7 @@ import com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.j
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ICartRepository extends JpaRepository<CartEntity, Long> {
@@ -11,4 +12,8 @@ public interface ICartRepository extends JpaRepository<CartEntity, Long> {
     CartEntity findByUserIdAndArticleId(Long userId, Long articleId);
 
     List<CartEntity> findByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
+
+    CartEntity findTopByUserIdOrderByLastUpdatedDateDesc(Long userId);
 }
