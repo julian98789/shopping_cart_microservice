@@ -16,7 +16,6 @@ import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
 
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -97,7 +96,7 @@ public class CartUseCase implements ICartModelServicePort {
     public String getLatestCartUpdateDate() {
         Long userId = authenticationPersistencePort.getAuthenticatedUserId();
         LocalDate lastUpdatedDate = cartPersistencePort.getLatestCartUpdateDate(userId);
-        return formatDate(lastUpdatedDate);
+        return lastUpdatedDate.format(DateTimeFormatter.ofPattern(Util.DATE_FORMAT));
     }
 
     @Override
@@ -127,11 +126,7 @@ public class CartUseCase implements ICartModelServicePort {
         return cartPersistencePort.findArticleByUserIdAndArticleId(cartModel.getUserId(), cartModel.getArticleId());
     }
 
-    private String formatDate(LocalDate date) {
-        LocalDateTime localDateTime = date.atStartOfDay();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Util.DATE_FORMAT);
-        return localDateTime.format(formatter);
-    }
+
 
     private void validateProductExistence(Long articleId) {
         if (!stockConnectionPersistencePort.existById(articleId)) {

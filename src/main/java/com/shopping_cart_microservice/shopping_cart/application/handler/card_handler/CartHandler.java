@@ -75,10 +75,8 @@ public class CartHandler implements ICartHandler{
 
         CartModel cartModel = cartRequestMapper.cartUpdateRequestToCartModel(cartRequest);
 
-        // Llamamos al servicio que contiene la lógica de negocio
         CartModel updatedCartModel = cartServicePort.updateCartQuantity(cartModel);
 
-        // Mapeamos el modelo a la respuesta
         return cartResponseMapper.cartModelToCartResponse(updatedCartModel);
     }
 }
