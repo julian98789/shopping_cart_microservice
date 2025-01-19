@@ -2,8 +2,6 @@ package com.shopping_cart_microservice.shopping_cart.domain.util;
 
 public class Util {
 
-    public static final String ROLE_ADMIN = "hasRole('ADMIN')";
-    public static final String ROLE_AUX_BODEGA = "hasRole('AUX_BODEGA')";
     public static final String ROLE_CLIENT = "hasRole('CLIENT')";
     public static final String CLAIM_AUTHORITIES = "authorities";
     public static final String AUTH_HEADER = "Authorization";
@@ -20,7 +18,7 @@ public class Util {
     public static final String CATEGORIES_LIMIT_EXCEEDED = "Se ha excedido el límite de categorías para la categoría: ";
     public static final String ARTICLE_DELETED_SUCCESSFULLY = "Articulo eliminado del carrito exitosamente";
     public static final int TOKEN_PREFIX_LENGTH = 7;
-    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DATE_FORMAT = "dd-MM-yyyy HH:mm:ss";
     public static final int  ARTICLE_QUANTITY_MIN = 1;
     public static final String  ARTICLE_QUANTITY_MIN_MESSAGE = "La cantidad debe ser mayor a 0";
     public static final String DELETE_CART_RESPONSE_BODY = "Carrito eliminado exitosamente";

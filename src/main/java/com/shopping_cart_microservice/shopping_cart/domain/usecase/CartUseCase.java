@@ -13,8 +13,7 @@ import com.shopping_cart_microservice.shopping_cart.domain.spi.IStockConnectionP
 import com.shopping_cart_microservice.shopping_cart.domain.spi.ISupplyConnectionPersistencePort;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +27,6 @@ public class CartUseCase implements ICartModelServicePort {
     private final ISupplyConnectionPersistencePort supplyConnectionPersistencePort;
     private final IAuthenticationSecurityPort authenticationPersistencePort;
 
-    private static final Logger logger = LoggerFactory.getLogger(CartUseCase.class);
 
     public CartUseCase(ICartModelPersistencePort cartPersistencePort, IStockConnectionPersistencePort stockConnectionPersistencePort, ISupplyConnectionPersistencePort supplyConnectionPersistencePort, IAuthenticationSecurityPort authenticationPersistencePort) {
         this.cartPersistencePort = cartPersistencePort;
@@ -131,7 +129,7 @@ public class CartUseCase implements ICartModelServicePort {
 
     private String formatDate(LocalDate date) {
         LocalDateTime localDateTime = date.atStartOfDay();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Util.DATE_FORMAT);
         return localDateTime.format(formatter);
     }
 
