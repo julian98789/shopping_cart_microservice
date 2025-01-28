@@ -1,5 +1,5 @@
 services:
-  java-app-shopping_cart:
+  app-shopping_cart:
     build:
       context: .
       dockerfile: Dockerfile
