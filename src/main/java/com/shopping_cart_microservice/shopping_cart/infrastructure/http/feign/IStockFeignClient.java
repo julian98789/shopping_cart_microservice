@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = Util.STOCK_SERVICE_NAME, url = Util.STOCK_SERVICE_URL)
+//@FeignClient(name = "stock-app", url = "http://stock-app:8080") para el entorno de produccion en docker
+@FeignClient(name = "stock-app", url = "http://stock-app:8080")
 public interface IStockFeignClient {
 
     @GetMapping("/api/article/{articleId}")
