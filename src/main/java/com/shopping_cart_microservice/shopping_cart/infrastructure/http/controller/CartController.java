@@ -84,7 +84,7 @@ public class CartController {
     })
     @PreAuthorize(Util.ROLE_CLIENT)
     @GetMapping("get-cart-by-user")
-    public ResponseEntity<List<CartResponse>> buyProducts(){
+    public ResponseEntity<List<CartResponse>> buyUser(){
 
         List<CartResponse> cartByUserId = cartHandler.findCartByUserId();
 
