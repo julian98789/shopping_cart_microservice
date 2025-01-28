@@ -81,7 +81,7 @@ class CartControllerTest {
         List<CartResponse> cartResponses = Collections.emptyList();
         when(cartHandler.findCartByUserId()).thenReturn(cartResponses);
 
-        ResponseEntity<List<CartResponse>> response = cartController.buyProducts();
+        ResponseEntity<List<CartResponse>> response = cartController.buyUser();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(cartResponses, response.getBody());
