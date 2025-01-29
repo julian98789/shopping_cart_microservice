@@ -2,7 +2,7 @@
 
 The **Shopping Cart** microservice is responsible for managing the items in the shopping cart in the database. Its main function is to register and manage the items of the user who owns the cart, providing an efficient and scalable API for user management.
 
-This service follows a hexagonal architecture, ensuring a clear separation between business logic and infrastructure layers. Additionally, it integrates with other microservices, such as the stock service, to obtain items or the user service to verify the user accessing the cart.
+This service follows a hexagonal architecture, ensuring a clear separation between business logic and infrastructure layers. Additionally, it integrates with other microservices, such as the **Stock** service, to obtain items or the **User** service to verify the user accessing the cart.
 
 ## Installation
 
