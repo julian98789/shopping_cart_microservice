@@ -2,8 +2,8 @@ package com.shopping_cart_microservice.shopping_cart.infrastructure.configuratio
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shopping_cart_microservice.shopping_cart.application.mapper.article_mapper.IArticleRequestMapper;
-import com.shopping_cart_microservice.shopping_cart.application.mapper.article_mapper.IArticleResponseMapper;
+import com.shopping_cart_microservice.shopping_cart.application.mapper.articlemapper.IArticleRequestMapper;
+import com.shopping_cart_microservice.shopping_cart.application.mapper.articlemapper.IArticleResponseMapper;
 import com.shopping_cart_microservice.shopping_cart.domain.api.ICartModelServicePort;
 import com.shopping_cart_microservice.shopping_cart.domain.security.IAuthenticationSecurityPort;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.ICartModelPersistencePort;

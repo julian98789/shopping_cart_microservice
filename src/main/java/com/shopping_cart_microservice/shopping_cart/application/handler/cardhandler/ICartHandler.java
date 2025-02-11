@@ -1,9 +1,9 @@
-package com.shopping_cart_microservice.shopping_cart.application.handler.card_handler;
+package com.shopping_cart_microservice.shopping_cart.application.handler.cardhandler;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartRequest;
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartResponse;
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartUpdateQuantityRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.articledto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartUpdateQuantityRequest;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 
 import java.util.List;

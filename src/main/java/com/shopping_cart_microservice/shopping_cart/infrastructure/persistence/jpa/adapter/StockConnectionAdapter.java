@@ -1,9 +1,9 @@
 package com.shopping_cart_microservice.shopping_cart.infrastructure.persistence.jpa.adapter;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleCartRequest;
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
-import com.shopping_cart_microservice.shopping_cart.application.mapper.article_mapper.IArticleRequestMapper;
-import com.shopping_cart_microservice.shopping_cart.application.mapper.article_mapper.IArticleResponseMapper;
+import com.shopping_cart_microservice.shopping_cart.application.dto.articledto.ArticleCartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.articledto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.mapper.articlemapper.IArticleRequestMapper;
+import com.shopping_cart_microservice.shopping_cart.application.mapper.articlemapper.IArticleResponseMapper;
 import com.shopping_cart_microservice.shopping_cart.domain.model.stock.article.ArticleCartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.model.stock.article.ArticleDetailsCartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.IStockConnectionPersistencePort;

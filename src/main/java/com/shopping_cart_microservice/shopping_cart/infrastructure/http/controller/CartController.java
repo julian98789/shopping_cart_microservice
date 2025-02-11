@@ -1,10 +1,10 @@
 package com.shopping_cart_microservice.shopping_cart.infrastructure.http.controller;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartRequest;
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartResponse;
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartUpdateQuantityRequest;
-import com.shopping_cart_microservice.shopping_cart.application.handler.card_handler.ICartHandler;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.articledto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartUpdateQuantityRequest;
+import com.shopping_cart_microservice.shopping_cart.application.handler.cardhandler.ICartHandler;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
 import io.swagger.v3.oas.annotations.Operation;

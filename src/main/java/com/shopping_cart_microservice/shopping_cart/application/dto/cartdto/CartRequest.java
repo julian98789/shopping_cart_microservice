@@ -1,4 +1,4 @@
-package com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto;
+package com.shopping_cart_microservice.shopping_cart.application.dto.cartdto;
 
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
 import jakarta.validation.constraints.Min;
@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CartUpdateQuantityRequest {
+public class CartRequest {
 
     @NotNull(message = Util.ARTICLE_QUANTITY_REQUIRED)
     @Min(value = Util.ARTICLE_QUANTITY_MIN, message = Util.ARTICLE_QUANTITY_MIN_MESSAGE)

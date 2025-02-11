@@ -1,4 +1,4 @@
-package com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto;
+package com.shopping_cart_microservice.shopping_cart.application.dto.cartdto;
 
 import lombok.Getter;
 import lombok.Setter;

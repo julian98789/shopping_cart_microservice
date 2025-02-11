@@ -1,10 +1,11 @@
 package com.shopping_cart_microservice.shopping_cart.infrastructure.http.controller;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartRequest;
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartResponse;
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartUpdateQuantityRequest;
-import com.shopping_cart_microservice.shopping_cart.application.handler.card_handler.ICartHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.articledto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartUpdateQuantityRequest;
+import com.shopping_cart_microservice.shopping_cart.application.handler.cardhandler.ICartHandler;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,18 +14,22 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class CartControllerTest {
+
+    private MockMvc mockMvc;
 
     @Mock
     private ICartHandler cartHandler;
@@ -32,95 +37,115 @@ class CartControllerTest {
     @InjectMocks
     private CartController cartController;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(cartController).build();
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    @DisplayName("Agregar articulo al carrito")
-    void testAddArticleToCart() {
+    @DisplayName("Should return 201 Created when adding an article to the cart")
+    void addArticleToCart_ShouldReturnCreated() throws Exception {
         CartRequest cartRequest = new CartRequest();
+        cartRequest.setArticleId(1L);
+        cartRequest.setQuantity(2);
+
         CartResponse cartResponse = new CartResponse();
+
         when(cartHandler.addArticleToCart(any(CartRequest.class))).thenReturn(cartResponse);
 
-        ResponseEntity<CartResponse> response = cartController.addArticleToCart(cartRequest);
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/cart/add-article-to-card")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cartRequest)))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(cartResponse)));
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(cartResponse, response.getBody());
+        verify(cartHandler, times(1)).addArticleToCart(any(CartRequest.class));
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    @DisplayName("Eliminar articulo del carrito")
-    void testRemoveArticleFromCart() {
-        ResponseEntity<String> response = cartController.removeArticleFromCart(1L);
+    @DisplayName("Should return 200 OK when removing an article from the cart")
+    void removeArticleFromCart_ShouldReturnOk() throws Exception {
+        doNothing().when(cartHandler).removeProductToCart(anyLong());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(Util.ARTICLE_DELETED_SUCCESSFULLY, response.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/cart/delete-article-from-cart/{articleId}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string(Util.ARTICLE_DELETED_SUCCESSFULLY));
+
+        verify(cartHandler, times(1)).removeProductToCart(1L);
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    @DisplayName("Obtener todos los articulos paginados por IDs")
-    void testGetAllArticlesPaginatedByIds() {
-        Paginated<ArticleDetailsCartResponse> paginatedResponse = new Paginated<>(Collections.emptyList(), 0, 0, 10);
-        when(cartHandler.getAllArticlesPaginatedByIds(anyInt(), anyInt(), anyString(), anyBoolean(), nullable(String.class), nullable(String.class))).thenReturn(paginatedResponse);
+    @DisplayName("Should return 200 OK when getting all articles paginated by IDs")
+    void getAllArticlesPaginatedByIds_ShouldReturnOk() throws Exception {
+        Paginated<ArticleDetailsCartResponse> paginatedResponse = new Paginated<>
+                (Collections.emptyList(), 0, 10, 0);
 
-        ResponseEntity<Paginated<ArticleDetailsCartResponse>> response = cartController.getAllArticlesPaginatedByIds(0, 10, "name", true, null, null);
+        when(cartHandler.getAllArticlesPaginatedByIds(anyInt(), anyInt(), anyString(), anyBoolean(), any(), any()))
+                .thenReturn(paginatedResponse);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(paginatedResponse, response.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart/article-cart")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "name")
+                        .param("ascending", "true"))
+                .andExpect(status().isOk());
+
+        verify(cartHandler, times(1))
+                .getAllArticlesPaginatedByIds(0, 10, "name", true, null, null);
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    @DisplayName("Comprar productos")
-    void testBuyProducts() {
+    @DisplayName("Should return 200 OK when getting the cart by user")
+    void buyUser_ShouldReturnOk() throws Exception {
         List<CartResponse> cartResponses = Collections.emptyList();
         when(cartHandler.findCartByUserId()).thenReturn(cartResponses);
 
-        ResponseEntity<List<CartResponse>> response = cartController.buyUser();
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart/get-cart-by-user"))
+                .andExpect(status().isOk());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(cartResponses, response.getBody());
+        verify(cartHandler, times(1)).findCartByUserId();
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    @DisplayName("Eliminar carrito")
-    void testDeleteCart() {
-        ResponseEntity<String> response = cartController.deleteCart();
+    @DisplayName("Should return 200 OK when deleting the cart")
+    void deleteCart_ShouldReturnOk() throws Exception {
+        doNothing().when(cartHandler).deleteCart();
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(Util.DELETE_CART_RESPONSE_BODY, response.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/cart/delete-cart"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string(Util.DELETE_CART_RESPONSE_BODY));
+
+        verify(cartHandler, times(1)).deleteCart();
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    @DisplayName("Obtener la ultima fecha de actualizacion del carrito")
-    void testGetLatestCartUpdateDate() {
-        String latestUpdateDate = "2023-10-10";
-        when(cartHandler.getLatestCartUpdateDate()).thenReturn(latestUpdateDate);
+    @DisplayName("Should return 200 OK when getting the latest cart update date")
+    void getLatestCartUpdateDate_ShouldReturnOk() throws Exception {
+        when(cartHandler.getLatestCartUpdateDate()).thenReturn("2025-02-11T12:00:00Z");
 
-        ResponseEntity<String> response = cartController.getLatestCartUpdateDate();
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/cart/latest-update"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("2025-02-11T12:00:00Z"));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(latestUpdateDate, response.getBody());
+        verify(cartHandler, times(1)).getLatestCartUpdateDate();
     }
 
     @Test
-    @WithMockUser(roles = "CLIENT")
-    @DisplayName("Actualizar cantidad de productos")
-    void testUpdateProductQuantity() {
-        CartUpdateQuantityRequest cartRequest = new CartUpdateQuantityRequest();
-        CartResponse cartResponse = new CartResponse();
-        when(cartHandler.updateCartQuantity(any(CartUpdateQuantityRequest.class))).thenReturn(cartResponse);
+    @DisplayName("Should return 201 Created when updating product quantity in the cart")
+    void updateProductQuantity_ShouldReturnCreated() throws Exception {
+        CartUpdateQuantityRequest request = new CartUpdateQuantityRequest();
+        CartResponse response = new CartResponse();
 
-        ResponseEntity<CartResponse> response = cartController.updateProductQuantity(cartRequest);
+        when(cartHandler.updateCartQuantity(any(CartUpdateQuantityRequest.class))).thenReturn(response);
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(cartResponse, response.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/cart/update-quantity")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(MockMvcResultMatchers.status().isCreated());
+
+        verify(cartHandler, times(1)).updateCartQuantity(any(CartUpdateQuantityRequest.class));
     }
 }

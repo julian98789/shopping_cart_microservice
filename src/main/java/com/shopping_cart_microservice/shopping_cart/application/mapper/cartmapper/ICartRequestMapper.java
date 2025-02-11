@@ -1,7 +1,7 @@
-package com.shopping_cart_microservice.shopping_cart.application.mapper.cart_mapper;
+package com.shopping_cart_microservice.shopping_cart.application.mapper.cartmapper;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartRequest;
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartUpdateQuantityRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartUpdateQuantityRequest;
 import com.shopping_cart_microservice.shopping_cart.domain.model.cart.CartModel;
 import org.mapstruct.Mapper;
 

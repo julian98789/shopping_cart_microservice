@@ -7,7 +7,6 @@ import com.shopping_cart_microservice.shopping_cart.domain.model.cart.CartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.security.IAuthenticationSecurityPort;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.ICartModelPersistencePort;
 import com.shopping_cart_microservice.shopping_cart.domain.spi.IStockConnectionPersistencePort;
-import com.shopping_cart_microservice.shopping_cart.domain.spi.ISupplyConnectionPersistencePort;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,23 +32,27 @@ class CartUseCaseTest {
     private IStockConnectionPersistencePort stockConnectionPersistencePort;
 
     @Mock
-    private ISupplyConnectionPersistencePort supplyConnectionPersistencePort;
-
-    @Mock
     private IAuthenticationSecurityPort authenticationPersistencePort;
 
     @InjectMocks
     private CartUseCase cartUseCase;
 
+    private CartModel cartModel;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        cartModel = new CartModel();
     }
 
     @Test
-    @DisplayName("Agregar articulo al carrito")
-    void testAddArticleToCart() {
-        CartModel cartModel = new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now());
+    @DisplayName("Should add an article to the cart and return the updated cart model")
+    void shouldAddArticleToCart() {
+        cartModel.setId(1L);
+        cartModel.setArticleId(1L);
+        cartModel.setQuantity(1);
+
         when(authenticationPersistencePort.getAuthenticatedUserId()).thenReturn(1L);
         when(stockConnectionPersistencePort.existById(anyLong())).thenReturn(true);
         when(cartPersistencePort.findArticleByUserIdAndArticleId(anyLong(), anyLong())).thenReturn(null);
@@ -59,13 +62,19 @@ class CartUseCaseTest {
         CartModel result = cartUseCase.addArticleToCart(cartModel);
 
         assertEquals(cartModel, result);
+
+        verify(authenticationPersistencePort, times(1)).getAuthenticatedUserId();
+        verify(stockConnectionPersistencePort, times(1)).existById(anyLong());
+        verify(cartPersistencePort, times(1)).addArticleToCart(any(CartModel.class));
+        verify(stockConnectionPersistencePort, times(1)).isStockSufficient(anyLong(), anyInt());
+        verify(cartPersistencePort, times(1)).addArticleToCart(any(CartModel.class));
     }
 
     @Test
-    @DisplayName("Eliminar producto del carrito")
-    void testRemoveProductToCart() {
+    @DisplayName("Should remove an article from the cart by user ID and article ID")
+    void shouldRemoveArticleFromCart() {
         when(authenticationPersistencePort.getAuthenticatedUserId()).thenReturn(1L);
-        when(cartPersistencePort.findArticleByUserIdAndArticleId(anyLong(), anyLong())).thenReturn(new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now()));
+        when(cartPersistencePort.findArticleByUserIdAndArticleId(anyLong(), anyLong())).thenReturn(new CartModel());
 
         cartUseCase.removeProductToCart(1L);
 
@@ -74,20 +83,23 @@ class CartUseCaseTest {
     }
 
     @Test
-    @DisplayName("Buscar carrito por ID de usuario")
-    void testFindCartByUserId() {
-        List<CartModel> cartModels = Collections.singletonList(new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now()));
+    @DisplayName("Should find the cart by user ID and return a list of cart models")
+    void shouldFindCartByUserId() {
+        List<CartModel> cartModels = Collections.singletonList(new CartModel());
         when(authenticationPersistencePort.getAuthenticatedUserId()).thenReturn(1L);
         when(cartPersistencePort.findCartByUserId(anyLong())).thenReturn(cartModels);
 
         List<CartModel> result = cartUseCase.findCartByUserId();
 
         assertEquals(cartModels, result);
+
+        verify(cartPersistencePort, times(1)).findCartByUserId(anyLong());
+        verify(authenticationPersistencePort, times(1)).getAuthenticatedUserId();
     }
 
     @Test
-    @DisplayName("Eliminar carrito")
-    void testDeleteCart() {
+    @DisplayName("Should delete the cart for a given user ID")
+    void shouldDeleteCart() {
         when(authenticationPersistencePort.getAuthenticatedUserId()).thenReturn(1L);
 
         cartUseCase.deleteCart();
@@ -96,37 +108,48 @@ class CartUseCaseTest {
     }
 
     @Test
-    @DisplayName("Obtener la ultima fecha de actualizacion del carrito")
-    void testGetLatestCartUpdateDate() {
+    @DisplayName("Should get the latest cart update date for a given user ID")
+    void shouldGetLatestCartUpdateDate() {
         LocalDate latestUpdateDate = LocalDate.of(2023, 10, 10);
+
         when(authenticationPersistencePort.getAuthenticatedUserId()).thenReturn(1L);
         when(cartPersistencePort.getLatestCartUpdateDate(anyLong())).thenReturn(latestUpdateDate);
 
         String result = cartUseCase.getLatestCartUpdateDate();
 
         assertEquals("2023-10-10", result);
+
+        verify(authenticationPersistencePort, times(1)).getAuthenticatedUserId();
+        verify(cartPersistencePort, times(1)).getLatestCartUpdateDate(anyLong());
     }
 
     @Test
-    @DisplayName("Actualizar cantidad de productos")
-    void testUpdateCartQuantity() {
-        CartModel cartModel = new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now());
+    @DisplayName("Should update the quantity of products in the cart and return the updated cart model")
+    void shouldUpdateCartQuantity() {
+        CartModel cartCreated = new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now());
         CartModel existingCart = new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now());
+
         when(authenticationPersistencePort.getAuthenticatedUserId()).thenReturn(1L);
         when(cartPersistencePort.findArticleByUserIdAndArticleId(anyLong(), anyLong())).thenReturn(existingCart);
         when(stockConnectionPersistencePort.isStockSufficient(anyLong(), anyInt())).thenReturn(true);
-        when(cartPersistencePort.addArticleToCart(any(CartModel.class))).thenReturn(cartModel);
+        when(cartPersistencePort.addArticleToCart(any(CartModel.class))).thenReturn(cartCreated);
 
-        CartModel result = cartUseCase.updateCartQuantity(cartModel);
+        CartModel result = cartUseCase.updateCartQuantity(cartCreated);
 
-        assertEquals(cartModel, result);
+        assertEquals(cartCreated, result);
+
+        verify(authenticationPersistencePort, times(1)).getAuthenticatedUserId();
+        verify(cartPersistencePort, times(1)).findArticleByUserIdAndArticleId(anyLong(), anyLong());
+        verify(stockConnectionPersistencePort, times(1)).isStockSufficient(anyLong(), anyInt());
+        verify(cartPersistencePort, times(1)).addArticleToCart(any(CartModel.class));
     }
 
     @Test
-    @DisplayName("Obtener todos los artículos paginados por IDs")
-    void testFindArticleIdsByUserId() {
+    @DisplayName("Should find article IDs by user ID and return paginated article details")
+    void shouldFindArticleIdsByUserId() {
         List<Long> articleIds = Collections.singletonList(1L);
         Paginated<ArticleDetailsCartModel> paginatedArticles = new Paginated<>(Collections.emptyList(), 0, 0, 0);
+
         when(authenticationPersistencePort.getAuthenticatedUserId()).thenReturn(1L);
         when(cartPersistencePort.findArticleIdsByUserId(anyLong())).thenReturn(articleIds);
         when(stockConnectionPersistencePort.getAllArticlesPaginatedByIds(anyInt(), anyInt(), anyString(), anyBoolean(), anyString(), anyString(), any(ArticleCartModel.class)))
@@ -135,5 +158,9 @@ class CartUseCaseTest {
         Paginated<ArticleDetailsCartModel> result = cartUseCase.findArticleIdsByUserId(0, 10, "name", true, "electronics", "brandA");
 
         assertEquals(paginatedArticles, result);
+
+        verify(authenticationPersistencePort, times(1)).getAuthenticatedUserId();
+        verify(cartPersistencePort, times(1)).findArticleIdsByUserId(anyLong());
+        verify(stockConnectionPersistencePort, times(1)).getAllArticlesPaginatedByIds(anyInt(), anyInt(), anyString(), anyBoolean(), anyString(), anyString(), any(ArticleCartModel.class));
     }
 }

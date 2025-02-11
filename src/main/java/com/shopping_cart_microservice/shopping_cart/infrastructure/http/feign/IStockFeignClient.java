@@ -1,7 +1,7 @@
 package com.shopping_cart_microservice.shopping_cart.infrastructure.http.feign;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleCartRequest;
-import com.shopping_cart_microservice.shopping_cart.application.dto.article_dto.ArticleDetailsCartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.articledto.ArticleCartRequest;
+import com.shopping_cart_microservice.shopping_cart.application.dto.articledto.ArticleDetailsCartResponse;
 import com.shopping_cart_microservice.shopping_cart.domain.model.stock.article.ArticleDetailsCartModel;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Paginated;
 import com.shopping_cart_microservice.shopping_cart.domain.util.Util;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 //@FeignClient(name = "stock-app", url = "http://stock-app:8080") para el entorno de produccion en docker
-@FeignClient(name = "stock-app", url = "http://stock-app:8080")
+@FeignClient(name = Util.STOCK_SERVICE_NAME, url = Util.STOCK_SERVICE_URL)
 public interface IStockFeignClient {
 
     @GetMapping("/api/article/{articleId}")

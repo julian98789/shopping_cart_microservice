@@ -36,6 +36,9 @@ public class ArticleDetailsCartModel {
         this.subtotal = subtotal;
     }
 
+    public ArticleDetailsCartModel() {
+    }
+
     public Long getId() {
         return id;
     }

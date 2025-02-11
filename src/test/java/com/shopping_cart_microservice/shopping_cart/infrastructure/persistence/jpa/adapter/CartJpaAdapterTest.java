@@ -31,16 +31,20 @@ class CartJpaAdapterTest {
     @InjectMocks
     private CartJpaAdapter cartJpaAdapter;
 
+    private CartModel cartModel;
+    private CartEntity cartEntity;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        cartModel = new CartModel();
+        cartEntity = new CartEntity();
     }
 
     @Test
-    @DisplayName("Agregar articulo al carrito")
-    void testAddArticleToCart() {
-        CartModel cartModel = new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now());
-        CartEntity cartEntity = new CartEntity();
+    @DisplayName("Should add an article to the cart and return the updated cart model")
+    void shouldAddArticleToCart() {
         when(cartEntityMapper.cartModelToCartEntity(any(CartModel.class))).thenReturn(cartEntity);
         when(cartRepository.save(any(CartEntity.class))).thenReturn(cartEntity);
         when(cartEntityMapper.cartEntityToCartModel(any(CartEntity.class))).thenReturn(cartModel);
@@ -48,47 +52,54 @@ class CartJpaAdapterTest {
         CartModel result = cartJpaAdapter.addArticleToCart(cartModel);
 
         assertEquals(cartModel, result);
+
+        verify(cartRepository, times(1)).save(cartEntity);
+        verify(cartEntityMapper, times(1)).cartModelToCartEntity(cartModel);
+        verify(cartEntityMapper, times(1)).cartEntityToCartModel(cartEntity);
     }
 
     @Test
-    @DisplayName("Buscar articulo por ID de usuario e ID de articulo")
-    void testFindArticleByUserIdAndArticleId() {
-        CartEntity cartEntity = new CartEntity();
-        CartModel cartModel = new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now());
+    @DisplayName("Should find an article by user ID and article ID and return the cart model")
+    void shouldFindArticleByUserIdAndArticleId() {
         when(cartRepository.findByUserIdAndArticleId(anyLong(), anyLong())).thenReturn(cartEntity);
         when(cartEntityMapper.cartEntityToCartModel(any(CartEntity.class))).thenReturn(cartModel);
 
         CartModel result = cartJpaAdapter.findArticleByUserIdAndArticleId(1L, 1L);
 
         assertEquals(cartModel, result);
+
+        verify(cartRepository, times(1)).findByUserIdAndArticleId(1L, 1L);
+        verify(cartEntityMapper, times(1)).cartEntityToCartModel(cartEntity);
     }
 
     @Test
-    @DisplayName("Buscar IDs de articulos por ID de usuario")
-    void testFindArticleIdsByUserId() {
+    @DisplayName("Should find article IDs by user ID and return a list of article IDs")
+    void shouldFindArticleIdsByUserId() {
         List<CartEntity> cartEntities = Collections.singletonList(new CartEntity());
         when(cartRepository.findByUserId(anyLong())).thenReturn(cartEntities);
 
         List<Long> result = cartJpaAdapter.findArticleIdsByUserId(1L);
 
         assertEquals(1, result.size());
+
+        verify(cartRepository, times(1)).findByUserId(1L);
     }
 
     @Test
-    @DisplayName("Eliminar articulo del carrito")
-    void testRemoveArticleFromCart() {
-        CartEntity cartEntity = new CartEntity();
+    @DisplayName("Should remove an article from the cart by user ID and article ID")
+    void shouldRemoveArticleFromCart() {
         when(cartRepository.findByUserIdAndArticleId(anyLong(), anyLong())).thenReturn(cartEntity);
         doNothing().when(cartRepository).delete(any(CartEntity.class));
 
         cartJpaAdapter.removeArticleFromCart(1L, 1L);
 
         verify(cartRepository, times(1)).delete(cartEntity);
+        verify(cartRepository, times(1)).findByUserIdAndArticleId(1L, 1L);
     }
 
     @Test
-    @DisplayName("Actualizar fecha de actualizacion de los articulos del carrito")
-    void testUpdateCartItemsUpdatedAt() {
+    @DisplayName("Should update the last updated date of cart items for a given user ID")
+    void shouldUpdateCartItemsLastUpdatedDate() {
         List<CartEntity> cartEntities = Collections.singletonList(new CartEntity());
         when(cartRepository.findByUserId(anyLong())).thenReturn(cartEntities);
         when(cartRepository.save(any(CartEntity.class))).thenReturn(new CartEntity());
@@ -96,24 +107,29 @@ class CartJpaAdapterTest {
         cartJpaAdapter.updateCartItemsUpdatedAt(1L, LocalDate.now());
 
         verify(cartRepository, times(1)).save(any(CartEntity.class));
+        verify(cartRepository, times(1)).findByUserId(1L);
     }
 
     @Test
-    @DisplayName("Buscar carrito por ID de usuario")
-    void testFindCartByUserId() {
+    @DisplayName("Should find the cart by user ID and return a list of cart models")
+    void shouldFindCartByUserId() {
         List<CartEntity> cartEntities = Collections.singletonList(new CartEntity());
-        List<CartModel> cartModels = Collections.singletonList(new CartModel(1L, 1L, 1L, 1, LocalDate.now(), LocalDate.now()));
+        List<CartModel> cartModels = Collections.singletonList(new CartModel());
+
         when(cartRepository.findByUserId(anyLong())).thenReturn(cartEntities);
         when(cartEntityMapper.cartEntitiesListToCartModelsList(anyList())).thenReturn(cartModels);
 
         List<CartModel> result = cartJpaAdapter.findCartByUserId(1L);
 
         assertEquals(cartModels, result);
+
+        verify(cartRepository, times(1)).findByUserId(1L);
+        verify(cartEntityMapper, times(1)).cartEntitiesListToCartModelsList(cartEntities);
     }
 
     @Test
-    @DisplayName("Eliminar carrito")
-    void testDeleteCart() {
+    @DisplayName("Should delete the cart for a given user ID")
+    void shouldDeleteCart() {
         doNothing().when(cartRepository).deleteByUserId(anyLong());
 
         cartJpaAdapter.deleteCart(1L);
@@ -122,14 +138,15 @@ class CartJpaAdapterTest {
     }
 
     @Test
-    @DisplayName("Obtener la ultima fecha de actualizacion del carrito")
-    void testGetLatestCartUpdateDate() {
-        CartEntity cartEntity = new CartEntity();
+    @DisplayName("Should get the latest cart update date for a given user ID")
+    void shouldGetLatestCartUpdateDate() {
         cartEntity.setLastUpdatedDate(LocalDate.now());
         when(cartRepository.findTopByUserIdOrderByLastUpdatedDateDesc(anyLong())).thenReturn(cartEntity);
 
         LocalDate result = cartJpaAdapter.getLatestCartUpdateDate(1L);
 
         assertEquals(cartEntity.getLastUpdatedDate(), result);
+
+        verify(cartRepository, times(1)).findTopByUserIdOrderByLastUpdatedDateDesc(1L);
     }
 }

@@ -1,6 +1,6 @@
-package com.shopping_cart_microservice.shopping_cart.application.mapper.cart_mapper;
+package com.shopping_cart_microservice.shopping_cart.application.mapper.cartmapper;
 
-import com.shopping_cart_microservice.shopping_cart.application.dto.cart_dto.CartResponse;
+import com.shopping_cart_microservice.shopping_cart.application.dto.cartdto.CartResponse;
 import com.shopping_cart_microservice.shopping_cart.domain.model.cart.CartModel;
 import org.mapstruct.Mapper;
 
